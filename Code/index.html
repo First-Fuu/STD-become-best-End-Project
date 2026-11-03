@@ -3,91 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STD Internship — ระบบติดตามการฝึกงาน</title>
+  <title>InternFlow — Ready to begin?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
-  <section id="auth-screen" class="auth-shell">
-    <button id="auth-theme-toggle" class="auth-theme-btn" type="button" title="สลับธีม" aria-label="สลับธีม">☼</button>
-    <div class="auth-orb orb-one"></div><div class="auth-orb orb-two"></div><div class="auth-grid"></div>
-    <div class="universe" aria-hidden="true">
-      <i class="star star-a"></i><i class="star star-b"></i><i class="star star-c"></i><i class="star star-d"></i><i class="star star-e"></i><i class="star star-f"></i><i class="star star-g"></i><i class="star star-h"></i><i class="star star-i"></i>
-      <div id="floating-planet" class="floating-planet" role="button" tabindex="0" aria-label="เร่งความเร็วดาวเคราะห์น้อย"><span class="f-planet-core"></span><span class="f-orbit"><b class="f-moon"></b></span><span class="solar-hint f-hint">✦ คลิกเพื่อเร่งความเร็ว</span></div>
-      <div id="solar-system" class="solar-system" role="button" tabindex="0" aria-label="เร่งการหมุนของระบบสุริยะ"><span class="sun"></span><span class="orbit orbit-one"><b class="planet planet-one"></b></span><span class="orbit orbit-two"><b class="planet planet-two"></b></span><span class="orbit orbit-three"><b class="planet planet-three"></b></span><span class="orbit orbit-four"><b class="planet planet-four"><i class="saturn-ring"></i></b></span><span class="solar-hint">✦ ชี้หรือคลิกเพื่อเร่งการโคจร</span></div><div class="sunny-sky" aria-hidden="true"><span class="sunny"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><div id="rainbow" class="rainbow" role="button" tabindex="0" aria-label="คลิกเพื่อเล่นแอนิเมชันสายรุ้ง"><svg class="rainbow-svg" viewBox="0 0 600 600"><path class="rainbow-arc r-red" d="M 40,560 A 260,260 0 0,1 560,560"/><path class="rainbow-arc r-orange" d="M 66,560 A 234,234 0 0,1 534,560"/><path class="rainbow-arc r-yellow" d="M 92,560 A 208,208 0 0,1 508,560"/><path class="rainbow-arc r-green" d="M 118,560 A 182,182 0 0,1 482,560"/><path class="rainbow-arc r-blue" d="M 144,560 A 156,156 0 0,1 456,560"/><path class="rainbow-arc r-purple" d="M 170,560 A 130,130 0 0,1 430,560"/></svg><span class="rainbow-sparkle sp-1">✦</span><span class="rainbow-sparkle sp-2">✦</span><span class="rainbow-sparkle sp-3">✦</span><span class="solar-hint rainbow-hint">✦ คลิกเพื่อให้สายรุ้งเรียงสี</span></div><span class="cloud-giant cloud-giant-left"><b></b><b></b><b></b><b></b></span><span class="cloud cloud-two"><b></b><b></b><b></b></span><span class="cloud cloud-three"><b></b><b></b><b></b></span><span class="cloud cloud-four"><b></b><b></b><b></b></span><span class="cloud cloud-five"><b></b><b></b><b></b></span><span class="cloud cloud-six"><b></b><b></b><b></b></span><span class="cloud cloud-seven"><b></b><b></b><b></b></span><span class="cloud cloud-eight"><b></b><b></b><b></b></span></div><span class="comet comet-one"><b class="comet-head"></b><i class="comet-tail"></i></span><span class="comet comet-two"><b class="comet-head"></b><i class="comet-tail"></i></span><span class="comet comet-three"><b class="comet-head"></b><i class="comet-tail"></i></span><span class="comet comet-four"><b class="comet-head"></b><i class="comet-tail"></i></span><i class="shooting-star shooting-star-one"></i><i class="shooting-star shooting-star-two"></i><i class="shooting-star shooting-star-three"></i><i class="shooting-star shooting-star-four"></i><i class="shooting-star shooting-star-five"></i><i class="shooting-star shooting-star-six"></i>
-    </div>
-    <div id="std-drawer-backdrop" class="std-drawer-backdrop" aria-hidden="true"></div>
-    <button id="std-drawer-trigger" class="std-drawer-trigger" type="button" aria-label="เปิดลิ้นชักข้อมูล STD" title="เปิดลิ้นชักข้อมูล STD"><span class="drawer-trigger-mark">✦</span><span class="drawer-trigger-text">ข้อมูล STD</span><span class="drawer-trigger-arrow">→</span></button>
-    <div class="auth-layout">
-      <aside id="auth-showcase" class="auth-showcase">
-        <button id="std-drawer-close" class="std-drawer-close" type="button" aria-label="ปิดลิ้นชักข้อมูล STD">✕</button>
-        <a class="brand auth-brand" href="#"><span class="brand-mark">✦</span><span>STD Internship</span></a>
-        <div class="showcase-copy">
-          <span class="eyebrow"><i></i> INTERNSHIP OS / 2026</span>
-          <h1>สร้างเส้นทาง<br><em>การฝึกงาน</em>ของคุณ</h1>
-          <p>บันทึกทุกประสบการณ์ฝึกงาน ติดตามความก้าวหน้า และเปลี่ยนทุกผลงานให้มีความหมาย</p>
+  <!-- Landing & Auth Screen -->
+  <section id="auth-screen" class="cinematic-landing">
+    <div class="footer-aurora" aria-hidden="true"></div>
+    <div class="footer-bg-grid" aria-hidden="true"></div>
+    <div class="footer-giant-bg-text" aria-hidden="true">INTERNFLOW</div>
+
+    <header class="landing-nav">
+      <a class="brand landing-brand magnetic" href="#"><span class="brand-mark">IF</span><span>InternFlow</span></a>
+      <div class="landing-nav-actions">
+        <button id="auth-theme-toggle" class="footer-glass-pill icon-pill magnetic" type="button" title="สลับธีม" aria-label="สลับธีม">☼</button>
+      </div>
+    </header>
+
+    <div class="diagonal-marquee" aria-hidden="true">
+      <div class="marquee-track animate-footer-scroll-marquee">
+        <div class="marquee-content">
+          <span>INTERNSHIP REDEFINED</span> <span class="marquee-star">·</span>
+          <span>TRANSPARENT TRACKING</span> <span class="marquee-star">·</span>
+          <span>DAILY WORK LOGS</span> <span class="marquee-star">·</span>
+          <span>320-HOURS PROGRESS</span> <span class="marquee-star">·</span>
+          <span>TEACHER REVIEW</span> <span class="marquee-star">·</span>
+          <span>LOCATION & GOOGLE MAPS</span> <span class="marquee-star">·</span>
+          <span>VERIFIED REPORTS</span> <span class="marquee-star">·</span>
+          <span>ABSOLUTE ACCURACY</span> <span class="marquee-star">·</span>
         </div>
-        <div class="showcase-stats">
-          <div><strong>01</strong><span>พื้นที่บันทึก<br>การทำงานของคุณ</span></div>
-          <div><strong>24/7</strong><span>ติดตามสถานะ<br>ได้ทุกเวลา</span></div>
-          <div><strong>INF</strong><span>โอกาสในการ<br>เรียนรู้</span></div>
-        </div>
-        <p class="auth-footer">© 2026 STD Internship · Your growth, in motion.</p>
-      </aside>
-      <div class="auth-card-wrap">
-        <div class="auth-card">
-          <div class="auth-card-top"><span class="auth-card-dot"></span><span>SECURE ACCESS</span></div>
-          <div id="login-panel">
-            <span class="auth-kicker">WELCOME STD</span>
-            <h2 class="auth-heading">ยินดีต้อนรับ STD</h2>
-            <p class="auth-lead">เข้าสู่ระบบเพื่อไปต่อกับเส้นทางฝึกงานของคุณ</p>
-            <form id="login-form" class="form-grid">
-              <div><label for="login-email">อีเมล</label><div class="auth-input-wrap"><span class="field-icon">✉</span><input id="login-email" class="input" type="email" autocomplete="email" required placeholder="name@example.com"></div></div>
-              <div><label for="login-password">รหัสผ่าน</label><div class="password-wrap auth-input-wrap"><span class="field-icon">⌑</span><input id="login-password" class="input" type="password" autocomplete="current-password" required placeholder="รหัสผ่านของคุณ"><button type="button" class="password-toggle" data-password-toggle="login-password" aria-label="แสดงรหัสผ่าน">◉</button></div></div>
-              <button class="btn btn-primary btn-block auth-submit" type="submit"><span>เข้าสู่ระบบ</span><b>→</b></button>
-            </form>
-            <p class="auth-switch">ยังไม่มีบัญชีหรอ สมัครสิ <button class="text-button" type="button" data-auth-panel="register">สร้างบัญชีเลย <span>→</span></button></p>
-            <div class="demo-quick-auth">
-              <span class="demo-quick-label">⚡ เข้าสู่ระบบทดสอบด่วน (คลิกเดียวใส่ข้อมูล):</span>
-              <div class="demo-quick-btns">
-                <button type="button" class="demo-chip" data-demo="student">🎓 นักเรียน</button>
-                <button type="button" class="demo-chip" data-demo="teacher">👨‍🏫 อาจารย์</button>
-                <button type="button" class="demo-chip" data-demo="admin">👑 แอดมิน</button>
-              </div>
-            </div>
-          </div>
-          <div id="register-panel" class="hidden">
-            <span class="auth-kicker">GET STARTED</span>
-            <h2 class="auth-heading">เริ่มต้นเส้นทางใหม่</h2>
-            <p class="auth-lead">สร้างบัญชีเพื่อเก็บทุกก้าวสำคัญของการฝึกงาน</p>
-            <div class="notice">เวอร์ชันสาธิต: ข้อมูลเก็บเฉพาะในเบราว์เซอร์เครื่องนี้ บัญชีใหม่จะเป็นนักเรียนโดยอัตโนมัติ</div>
-            <form id="register-form" class="form-grid">
-              <div><label for="register-name">ชื่อที่แสดง <span class="required">*</span></label><input id="register-name" class="input" required maxlength="80" placeholder="ชื่อ - นามสกุล"></div>
-              <div><label for="register-department">แผนกวิชา / สาขา <span class="required">*</span></label><select id="register-department" class="input" required></select></div>
-              <div><label for="register-email">อีเมล <span class="required">*</span></label><input id="register-email" class="input" type="email" required autocomplete="email" placeholder="name@example.com"></div>
-              <div><label for="register-password">รหัสผ่าน <span class="required">*</span></label><div class="password-wrap"><input id="register-password" class="input" type="password" minlength="6" required autocomplete="new-password" placeholder="อย่างน้อย 6 ตัวอักษร"><button type="button" class="password-toggle" data-password-toggle="register-password" aria-label="แสดงรหัสผ่าน">◉</button></div></div>
-              <button class="btn btn-primary btn-block auth-submit" type="submit"><span>สร้างบัญชีและเข้าสู่ระบบ</span><b>→</b></button>
-            </form>
-            <p class="auth-switch">มีบัญชีอยู่แล้ว? <button class="text-button" type="button" data-auth-panel="login">เข้าสู่ระบบ <span>→</span></button></p>
-          </div>
+        <div class="marquee-content" aria-hidden="true">
+          <span>INTERNSHIP REDEFINED</span> <span class="marquee-star">·</span>
+          <span>TRANSPARENT TRACKING</span> <span class="marquee-star">·</span>
+          <span>DAILY WORK LOGS</span> <span class="marquee-star">·</span>
+          <span>320-HOURS PROGRESS</span> <span class="marquee-star">·</span>
+          <span>TEACHER REVIEW</span> <span class="marquee-star">·</span>
+          <span>LOCATION & GOOGLE MAPS</span> <span class="marquee-star">·</span>
+          <span>VERIFIED REPORTS</span> <span class="marquee-star">·</span>
+          <span>ABSOLUTE ACCURACY</span> <span class="marquee-star">·</span>
         </div>
       </div>
     </div>
+
+    <div class="landing-content">
+      <div class="hero-header">
+        <span class="hero-tag">ระบบบริหารและติดตามการฝึกงาน</span>
+        <h1 class="hero-title footer-text-glow">Ready to begin?</h1>
+        <p class="hero-subtitle">เก็บบันทึกทุกภารกิจ คำนวณชั่วโมงฝึกงานสะสม และส่งรายงานให้อาจารย์นิเทศก์ได้อย่างครบวงจร</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button type="button" class="footer-glass-pill tab-pill active magnetic" data-auth-tab="login">เข้าสู่ระบบ</button>
+        <button type="button" class="footer-glass-pill tab-pill magnetic" data-auth-tab="register">สร้างบัญชีใหม่</button>
+      </div>
+
+      <div class="cinematic-card">
+        <div id="login-panel">
+          <form id="login-form" class="form-grid">
+            <div class="field-group">
+              <label for="login-email">อีเมล</label>
+              <input id="login-email" class="input" type="email" autocomplete="email" required placeholder="name@example.com">
+            </div>
+            <div class="field-group">
+              <label for="login-password">รหัสผ่าน</label>
+              <div class="password-wrap">
+                <input id="login-password" class="input" type="password" autocomplete="current-password" required placeholder="รหัสผ่านของคุณ">
+                <button type="button" class="password-toggle" data-password-toggle="login-password" aria-label="แสดงรหัสผ่าน">◉</button>
+              </div>
+            </div>
+            <button class="footer-glass-pill submit-pill btn-block magnetic" type="submit"><span>เข้าสู่ระบบ</span><b>→</b></button>
+          </form>
+
+          <div class="demo-quick-auth">
+            <span class="demo-quick-label">เข้าสู่ระบบทดสอบด่วน (คลิกเดียวใส่ข้อมูล):</span>
+            <div class="demo-quick-btns">
+              <button type="button" class="footer-glass-pill demo-chip magnetic" data-demo="student">นักเรียน</button>
+              <button type="button" class="footer-glass-pill demo-chip magnetic" data-demo="teacher">อาจารย์</button>
+              <button type="button" class="footer-glass-pill demo-chip magnetic" data-demo="admin">แอดมิน</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="register-panel" class="hidden">
+          <div class="notice">เวอร์ชันสาธิต: ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ บัญชีใหม่จะได้รับสิทธิ์นักเรียนโดยอัตโนมัติ</div>
+          <form id="register-form" class="form-grid">
+            <div class="field-group">
+              <label for="register-name">ชื่อ - นามสกุล <span class="required">*</span></label>
+              <input id="register-name" class="input" required maxlength="80" placeholder="ชื่อ นามสกุลจริง">
+            </div>
+            <div class="field-group">
+              <label for="register-department">แผนกวิชา / สาขา <span class="required">*</span></label>
+              <select id="register-department" class="input" required></select>
+            </div>
+            <div class="field-group">
+              <label for="register-email">อีเมล <span class="required">*</span></label>
+              <input id="register-email" class="input" type="email" required autocomplete="email" placeholder="student@example.com">
+            </div>
+            <div class="field-group">
+              <label for="register-password">รหัสผ่าน <span class="required">*</span></label>
+              <div class="password-wrap">
+                <input id="register-password" class="input" type="password" minlength="6" required autocomplete="new-password" placeholder="อย่างน้อย 6 ตัวอักษร">
+                <button type="button" class="password-toggle" data-password-toggle="register-password" aria-label="แสดงรหัสผ่าน">◉</button>
+              </div>
+            </div>
+            <button class="footer-glass-pill submit-pill btn-block magnetic" type="submit"><span>สร้างบัญชีและเข้าสู่ระบบ</span><b>→</b></button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <footer class="landing-bottom-bar">
+      <div class="copyright">© 2026 InternFlow. All rights reserved.</div>
+      <div class="footer-glass-pill crafted-badge magnetic"><span>Crafted by</span><strong class="crafted-author">Furi</strong></div>
+      <button id="landing-scroll-top" class="footer-glass-pill scroll-top-btn magnetic" type="button" aria-label="กลับสู่ด้านบน">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+      </button>
+    </footer>
   </section>
 
+  <!-- Main Application Dashboard -->
   <section id="app-screen" class="hidden">
-    <header class="app-header"><div class="header-inner">
-      <a class="brand" href="#"><span class="brand-mark">✦</span><span>STD Internship</span></a>
-      <div class="header-actions"><button id="theme-toggle" class="icon-btn" title="สลับธีม" aria-label="สลับธีม">☼</button><div class="user-menu"><span id="user-avatar" class="avatar"></span><span id="user-name" class="user-name"></span></div><button id="logout-button" class="btn btn-outline btn-small">ออกจากระบบ</button></div>
-    </div></header>
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="#"><span class="brand-mark">IF</span><span>InternFlow</span></a>
+        <div class="header-actions">
+          <button id="theme-toggle" class="icon-btn magnetic" title="สลับธีม" aria-label="สลับธีม">☼</button>
+          <div class="user-menu magnetic"><span id="user-avatar" class="avatar"></span><span id="user-name" class="user-name"></span></div>
+          <button id="logout-button" class="btn btn-outline btn-small magnetic">ออกจากระบบ</button>
+        </div>
+      </div>
+    </header>
+
     <div class="app-shell">
-      <div class="page-intro"><div><h1 id="page-title">ภาพรวมการฝึกงาน</h1><p id="page-subtitle">ติดตามความก้าวหน้าของคุณ</p></div><span id="current-role" class="role-pill"></span></div>
-      <div class="app-layout"><nav id="sidebar" class="sidebar"></nav><main id="content" class="content"></main></div>
+      <div class="page-intro">
+        <div><h1 id="page-title">ภาพรวมการฝึกงาน</h1><p id="page-subtitle">ติดตามความก้าวหน้าของคุณ</p></div>
+        <span id="current-role" class="role-pill"></span>
+      </div>
+
+      <div class="app-layout">
+        <nav id="sidebar" class="sidebar"></nav>
+        <main id="content" class="content"></main>
+      </div>
+
+      <footer class="dashboard-footer">
+        <div class="dashboard-footer-inner">
+          <span>© 2026 InternFlow · ระบบบันทึกและติดตามการฝึกงาน</span>
+          <div class="footer-glass-pill crafted-badge magnetic"><span>Crafted by</span><strong class="crafted-author">Furi</strong></div>
+        </div>
+      </footer>
     </div>
   </section>
+
   <div id="modal-root"></div>
   <div id="toast" class="toast" role="status"></div>
 </body>
