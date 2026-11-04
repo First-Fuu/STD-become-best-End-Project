@@ -576,15 +576,13 @@ function initMagneticButtons() {
 }
 
 function initParallax() {
-  const giant = $('.footer-giant-bg-text'), aurora = $('.footer-aurora');
-  if (!giant && !aurora) return;
+  if (!window.gsap || matchMedia('(pointer: coarse)').matches) return;
+  const giant = $('.footer-giant-bg-text');
+  if (!giant) return;
   window.addEventListener('mousemove', e => {
-    const dx = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
-    const dy = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-    if (window.gsap) {
-      if (giant) gsap.to(giant, { xPercent: -50 + dx * 2, y: dy * 8, duration: 0.8, ease: 'power1.out' });
-      if (aurora) gsap.to(aurora, { xPercent: -50 + dx * 4, yPercent: -50 + dy * 4, duration: 1.2, ease: 'power1.out' });
-    }
+    const dx = (e.clientX / window.innerWidth - 0.5) * 2;
+    const dy = (e.clientY / window.innerHeight - 0.5) * 2;
+    gsap.to(giant, { x: dx * 6, y: dy * 6, duration: 1, ease: 'power2.out', overwrite: 'auto' });
   });
 }
 

@@ -1,10 +1,10 @@
 const KEYS = {
-  users: 'internflow_users',
-  session: 'internflow_session',
-  logs: 'internflow_logs',
-  reports: 'internflow_reports',
-  departments: 'internflow_departments',
-  theme: 'internflow_theme'
+  users: 'stdinternship_users',
+  session: 'stdinternship_session',
+  logs: 'stdinternship_logs',
+  reports: 'stdinternship_reports',
+  departments: 'stdinternship_departments',
+  theme: 'stdinternship_theme'
 };
 
 const ROLE = {
