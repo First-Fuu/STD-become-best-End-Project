@@ -26,12 +26,15 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
+const SVG_ATTR = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const ICON_SUN = `<svg ${SVG_ATTR}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+const ICON_MOON = `<svg ${SVG_ATTR}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`;
+
 function setTheme(theme) {
   document.body.classList.toggle('light', theme === 'light');
   localStorage.setItem(KEYS.theme, theme);
-  const icon = theme === 'light' ? '☾' : '☼';
-  if ($('#theme-toggle')) $('#theme-toggle').textContent = icon;
-  if ($('#auth-theme-toggle')) $('#auth-theme-toggle').textContent = icon;
+  const icon = theme === 'light' ? ICON_MOON : ICON_SUN;
+  ['#theme-toggle', '#auth-theme-toggle'].forEach(sel => { const b = $(sel); if (b) { b.innerHTML = icon; b.setAttribute('aria-pressed', String(theme === 'light')); } });
 }
 
 const initials = name => name.trim().split(/\s+/).slice(0, 2).map(v => v[0]).join('').toUpperCase() || '?';
@@ -56,8 +59,7 @@ $('#landing-scroll-top')?.addEventListener('click', () => window.scrollTo({ top:
 // Demo Logins
 const DEMO_ACCOUNTS = {
   student: ['student@internflow.local', 'Student@InternFlow2026'],
-  teacher: ['teacher@internflow.local', 'Teacher@InternFlow2026'],
-  admin: ['admin@internflow.local', 'Admin@InternFlow2026']
+  teacher: ['teacher@internflow.local', 'Teacher@InternFlow2026']
 };
 $$('[data-demo]').forEach(btn => btn.addEventListener('click', () => {
   const [email, pwd] = DEMO_ACCOUNTS[btn.dataset.demo];
@@ -72,6 +74,7 @@ document.addEventListener('click', e => {
   if (!btn) return;
   const input = $(`#${btn.dataset.passwordToggle}`);
   input.type = input.type === 'password' ? 'text' : 'password';
+  btn.setAttribute('aria-label', input.type === 'password' ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน');
 });
 
 $('#login-form').addEventListener('submit', e => {
@@ -155,6 +158,85 @@ function renderView() {
   bindView();
 }
 
+
+// Ring / donut chart (SVG). segments: [{ value, cls }]; total = value of a full ring.
+function ringChart(segments, total, centerBig, centerSmall, label) {
+  const sum = segments.reduce((s, x) => s + x.value, 0);
+  const full = total || sum;
+  const multi = segments.filter(x => x.value > 0).length > 1;
+  let acc = 0;
+  const arcs = full > 0 ? segments.filter(x => x.value > 0).map(x => {
+    const len = Math.max(0, Math.min(100 - acc, (x.value / full) * 100));
+    const draw = multi ? Math.max(0, len - 1.2) : len;
+    const arc = `<circle class="ring-seg ${x.cls}" cx="50" cy="50" r="42" pathLength="100" stroke-dasharray="${draw} ${100 - draw}" stroke-dashoffset="${-acc}"></circle>`;
+    acc += len; return arc;
+  }).join('') : '';
+  return `<div class="ring" role="img" aria-label="${esc(label)}">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-track" cx="50" cy="50" r="42" pathLength="100"></circle>${arcs}</svg>
+    <div class="ring-center"><strong>${centerBig}</strong><span>${centerSmall}</span></div>
+  </div>`;
+}
+function ringLegend(items) {
+  return `<ul class="ring-legend">${items.map(i => `<li><i class="dot ${i.cls}"></i><span>${i.label}</span><strong>${i.value}</strong></li>`).join('')}</ul>`;
+}
+function reportStatusCounts(reports) {
+  return [
+    { cls: 'seg-success', label: 'อนุมัติแล้ว', value: reports.filter(r => r.status === 'approved').length },
+    { cls: 'seg-warning', label: 'รอตรวจ', value: reports.filter(r => r.status !== 'approved' && r.status !== 'revision').length },
+    { cls: 'seg-danger', label: 'ส่งกลับให้แก้ไข', value: reports.filter(r => r.status === 'revision').length }
+  ];
+}
+function reportDonutCard(reports, title) {
+  const st = reportStatusCounts(reports), n = reports.length, ok = st[0].value;
+  const label = `${title}: ` + st.map(s => `${s.label} ${s.value}`).join(', ');
+  return `<div class="card ring-card">
+    <h2>${title}</h2>
+    <div class="ring-body">
+      ${ringChart(st, 0, n, 'รายงานทั้งหมด', label)}
+      <div class="ring-side">${n ? ringLegend(st) : '<p class="card-subtitle">ยังไม่มีรายงานที่ส่งเข้ามา</p>'}${n ? `<p class="ring-note">อนุมัติแล้ว ${Math.round(ok / n * 100)}%</p>` : ''}</div>
+    </div>
+  </div>`;
+}
+
+
+// Overview helpers
+const localISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const sumHours = ls => ls.reduce((s, l) => s + (Number(l.hours) || 8), 0);
+
+function welcomeCard(user, text, cta) {
+  const h = new Date().getHours();
+  const hello = h < 12 ? 'สวัสดีตอนเช้า' : h < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+  const first = (user.name || '').trim().split(/\s+/)[0] || 'คุณ';
+  const date = new Intl.DateTimeFormat('th-TH', { dateStyle: 'full' }).format(new Date());
+  return `<div class="card welcome">
+    <div class="welcome-text"><span class="welcome-date">${esc(date)}</span><h2>${hello}, ${esc(first)}</h2><p>${text}</p></div>
+    ${cta ? `<button class="btn ${cta.primary ? 'btn-primary' : 'btn-outline'}" data-go="${cta.go}">${cta.label}</button>` : ''}
+  </div>`;
+}
+
+function weekBarsCard(logs) {
+  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d; });
+  const data = days.map(d => ({ d, iso: localISO(d), hours: sumHours(logs.filter(l => l.date === localISO(d))) }));
+  const max = Math.max(8, ...data.map(x => x.hours)), total = data.reduce((s, x) => s + x.hours, 0);
+  const label = 'ชั่วโมงฝึกงาน 7 วันล่าสุด: ' + data.map(x => `${new Intl.DateTimeFormat('th-TH', { weekday: 'long' }).format(x.d)} ${x.hours} ชั่วโมง`).join(', ');
+  return `<div class="card">
+    <div class="card-title-row"><div><h2>ชั่วโมงฝึกงาน 7 วันล่าสุด</h2><p class="card-subtitle">รวม ${total} ชม. ในสัปดาห์นี้</p></div></div>
+    <div class="week-bars" role="img" aria-label="${esc(label)}">
+      ${data.map((x, i) => `<div class="week-col ${i === 6 ? 'is-today' : ''}"><span class="week-val">${x.hours || ''}</span><div class="week-track"><div class="week-fill" style="height:${x.hours ? Math.max(6, x.hours / max * 100) : 0}%"></div></div><span class="week-day">${new Intl.DateTimeFormat('th-TH', { weekday: 'short' }).format(x.d)}</span></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function recentLogsCard(logs, title, subtitle, showName, go) {
+  const rows = [...logs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
+  return `<div class="card">
+    <div class="card-title-row"><div><h2>${title}</h2><p class="card-subtitle">${subtitle}</p></div>${go ? `<button class="btn btn-outline btn-small" data-go="${go}">ดูทั้งหมด</button>` : ''}</div>
+    ${rows.length ? `<ul class="mini-list">${rows.map(l => `<li>
+      <div class="mini-head"><strong>${formatDate(l.date)}</strong><span class="hour-badge">${esc(l.hours || 8)} ชม.</span>${showName ? `<span class="mini-who">${esc(userFor(l.userId)?.name || '')}</span>` : ''}</div>
+      <p>${esc(String(l.detail || '').slice(0, 110))}${String(l.detail || '').length > 110 ? '…' : ''}</p></li>`).join('')}</ul>` : '<div class="empty">ยังไม่มีบันทึกงาน</div>'}
+  </div>`;
+}
+
 // Views
 const views = {
   home() {
@@ -163,12 +245,34 @@ const views = {
     if (user.role === 'student') {
       const totalHours = ownLogs.reduce((s, l) => s + (Number(l.hours) || 8), 0), targetHours = 320;
       const percent = Math.min(100, Math.round((totalHours / targetHours) * 100));
+      const loggedToday = ownLogs.some(l => l.date === localISO(new Date()));
+      const welcome = loggedToday
+        ? welcomeCard(user, `บันทึกงานวันนี้แล้ว เหลืออีก ${Math.max(0, targetHours - totalHours)} ชม. ถึงเป้าหมาย ${targetHours} ชม.`, { go: 'reports', label: 'ส่งรายงานประจำสัปดาห์' })
+        : welcomeCard(user, 'วันนี้ยังไม่ได้บันทึกงาน ใช้เวลาไม่กี่นาทีเพื่อให้ชั่วโมงสะสมครบถ้วน', { go: 'daily', label: '+ บันทึกงานวันนี้', primary: true });
       return `
+        ${welcome}
         <div class="stats">
           <div class="stat"><div class="stat-label">ชั่วโมงฝึกงานสะสม</div><div class="stat-value stat-accent">${totalHours} <span style="font-size:1rem;font-weight:600;color:var(--muted);">/ ${targetHours} ชม.</span></div></div>
           <div class="stat"><div class="stat-label">บันทึกงานทั้งหมด</div><div class="stat-value">${ownLogs.length} วัน</div></div>
           <div class="stat"><div class="stat-label">รายงานที่ส่งแล้ว</div><div class="stat-value">${ownReports.length}</div></div>
           <div class="stat"><div class="stat-label">รอตรวจ / ให้แก้ไข</div><div class="stat-value">${ownReports.filter(r => r.status !== 'approved').length}</div></div>
+        </div>
+        <div class="summary-grid">
+          <div class="card ring-card">
+            <h2>ความคืบหน้าชั่วโมงฝึกงาน</h2>
+            <div class="ring-body">
+              ${ringChart([{ value: Math.min(totalHours, targetHours), cls: 'seg-primary' }], targetHours, percent + '%', `${totalHours} / ${targetHours} ชม.`, `ชั่วโมงฝึกงานสะสม ${totalHours} จาก ${targetHours} ชั่วโมง คิดเป็น ${percent} เปอร์เซ็นต์`)}
+              <div class="ring-side">
+                ${ringLegend([{ cls: 'seg-primary', label: 'สะสมแล้ว', value: totalHours + ' ชม.' }, { cls: 'seg-track', label: 'คงเหลือ', value: Math.max(0, targetHours - totalHours) + ' ชม.' }])}
+                <p class="ring-note">บันทึกแล้ว ${ownLogs.length} วัน</p>
+              </div>
+            </div>
+          </div>
+          ${reportDonutCard(ownReports, 'สถานะรายงานของฉัน')}
+        </div>
+        <div class="summary-grid">
+          ${weekBarsCard(ownLogs)}
+          ${recentLogsCard(ownLogs, 'บันทึกงานล่าสุด', 'งานที่คุณบันทึกไว้ล่าสุด', false, 'daily')}
         </div>
         <div class="card workplace-card">
           ${user.workplace ? `
@@ -185,10 +289,6 @@ const views = {
               <button class="btn btn-primary btn-small" data-go="settings">+ ระบุสถานที่ฝึกงาน</button>
             </div>
           `}
-          <div class="hours-progress-box">
-            <div class="progress-meta"><span>ความคืบหน้าชั่วโมงฝึกงาน: <strong>${totalHours} ชม. (${percent}%)</strong> จากเป้าหมาย ${targetHours} ชม.</span><strong>${percent}%</strong></div>
-            <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
-          </div>
         </div>
         <div class="card">
           <div class="card-title-row"><div><h2>สถานะรายงานล่าสุด</h2><p class="card-subtitle">ความเห็นจากอาจารย์จะปรากฏที่นี่</p></div><button class="btn btn-outline btn-small" data-go="reports">ดูรายงานทั้งหมด</button></div>
@@ -196,16 +296,38 @@ const views = {
         </div>`;
     }
     const students = read(KEYS.users).filter(u => u.role === 'student');
+    const ids = new Set(students.map(s => s.id));
+    const classHours = logs.filter(l => ids.has(l.userId)).reduce((s, l) => s + (Number(l.hours) || 8), 0), classTarget = students.length * 320;
+    const classPercent = classTarget ? Math.min(100, Math.round(classHours / classTarget * 100)) : 0;
+    const pendingCount = reports.filter(r => r.status === 'pending').length;
+    const staffWelcome = pendingCount
+      ? welcomeCard(user, `มี ${pendingCount} รายงานรอตรวจ ตรวจและส่งความเห็นกลับให้นักเรียนได้เลย`, { go: 'review', label: 'ไปตรวจรายงาน', primary: true })
+      : welcomeCard(user, 'ไม่มีรายงานค้างตรวจในตอนนี้', { go: 'review', label: 'ดูรายงานทั้งหมด' });
     return `
+      ${staffWelcome}
       <div class="stats">
         <div class="stat"><div class="stat-label">นักเรียนในระบบ</div><div class="stat-value stat-accent">${students.length}</div></div>
         <div class="stat"><div class="stat-label">รายงานรอตรวจ</div><div class="stat-value">${reports.filter(r => r.status === 'pending').length}</div></div>
         <div class="stat"><div class="stat-label">บันทึกงานทั้งหมด</div><div class="stat-value">${logs.length}</div></div>
       </div>
+      <div class="summary-grid">
+        <div class="card ring-card">
+          <h2>ชั่วโมงฝึกงานรวมของนักเรียน</h2>
+          <div class="ring-body">
+            ${ringChart([{ value: Math.min(classHours, classTarget), cls: 'seg-primary' }], classTarget, classPercent + '%', `${classHours} / ${classTarget} ชม.`, `ชั่วโมงรวมของนักเรียน ${classHours} จาก ${classTarget} ชั่วโมง คิดเป็น ${classPercent} เปอร์เซ็นต์`)}
+            <div class="ring-side">
+              ${ringLegend([{ cls: 'seg-primary', label: 'สะสมแล้ว', value: classHours + ' ชม.' }, { cls: 'seg-track', label: 'คงเหลือ', value: Math.max(0, classTarget - classHours) + ' ชม.' }])}
+              <p class="ring-note">เป้าหมาย ${students.length} คน × 320 ชม.</p>
+            </div>
+          </div>
+        </div>
+        ${reportDonutCard(reports, 'สถานะรายงานทั้งหมด')}
+      </div>
       <div class="card">
         <div class="card-title-row"><div><h2>${user.role === 'teacher' ? 'รายงานที่ต้องตรวจ' : 'รายการรายงานล่าสุด'}</h2><p class="card-subtitle">ตรวจสอบและติดตามความคืบหน้าได้รวดเร็ว</p></div><button class="btn btn-outline btn-small" data-go="review">ไปยังหน้ารายงาน</button></div>
         ${renderReports(reports.filter(r => r.status === 'pending').slice(0, 5), false, true)}
-      </div>`;
+      </div>
+      ${recentLogsCard(logs, 'บันทึกงานล่าสุดของนักเรียน', 'กิจกรรมล่าสุดในระบบ', true, user.role === 'admin' || user.role === 'teacher' ? 'logs' : '')}`;
   },
 
   daily() {
@@ -228,7 +350,8 @@ const views = {
           <div style="margin-top:15px"><label for="log-image">แนบรูปภาพประกอบ <span class="muted">(ไม่บังคับ, ไม่เกิน 10 MB)</span></label><input id="log-image" class="input" type="file" accept="image/*"><div id="image-preview-wrap" class="preview"><img id="image-preview" alt="ตัวอย่าง"></div></div>
           <div class="form-actions"><button class="btn btn-primary" type="submit">บันทึกข้อมูล</button></div>
         </form>
-      </div>`;
+      </div>
+      <div class="card"><div class="card-title-row"><div><h2>บันทึกงานของฉัน</h2><p class="card-subtitle">${read(KEYS.logs).filter(l => l.userId === currentUser().id).length} รายการ</p></div></div>${renderLogs(read(KEYS.logs).filter(l => l.userId === currentUser().id))}</div>`;
   },
 
   reports() {
@@ -588,15 +711,15 @@ function initParallax() {
 
 // Seed Demo Data
 function seedDefaultAccounts() {
-  const users = read(KEYS.users);
+  // เอาแอดมินเดโมรุ่นเก่า (รหัสผ่านเคยอยู่ในโค้ดสาธารณะ) ออกจาก localStorage
+  const users = read(KEYS.users).filter(u => !(u.id === 'admin-1' && u.password === 'Admin@InternFlow2026'));
   const demos = [
-    { id: 'admin-1', name: 'ผู้ดูแลระบบ by PT-FU', email: 'admin@internflow.local', password: 'Admin@InternFlow2026', role: 'admin', department: '', createdAt: new Date().toISOString() },
     { id: 'teacher-1', name: 'อาจารย์ปัณณรุจน์ สอนดีลบ', email: 'teacher@internflow.local', password: 'Teacher@InternFlow2026', role: 'teacher', department: '', createdAt: new Date().toISOString() },
     { id: 'student-1', name: 'นายฐานุปัติ นกกระตั่ว', email: 'student@internflow.local', password: 'Student@InternFlow2026', role: 'student', department: 'เทคโนโลยีธุรกิจดิจิทัล', workplace: 'บริษัท ดิจิทัล อินโนเวชั่น ซอฟต์แวร์ จำกัด', workplaceMap: 'https://maps.google.com/?q=Bangkok', createdAt: new Date().toISOString() }
   ];
   let changed = false;
   demos.forEach(d => { if (!users.some(u => u.email === d.email)) { users.push(d); changed = true; } });
-  if (changed) save(KEYS.users, users);
+  if (changed || users.length !== read(KEYS.users).length) save(KEYS.users, users);
 
   if (read(KEYS.reports).length === 0) {
     save(KEYS.reports, [
